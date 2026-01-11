@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AssetCategory {
+  id        String        @id @default(uuid())
+  userId    String
+  name      String
+  currency  String        @default("BRL")
+  records   AssetRecord[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("asset_categories")
+}
+
+model AssetRecord {
+  id           String   @id @default(uuid())
+  categoryId   String
+  month        Int
+  year         Int
+  amount       Decimal  @db.Decimal(15, 2)
+  exchangeRate Decimal? @db.Decimal(10, 4)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, month, year])
+  @@map("asset_records")
+}
