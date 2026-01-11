@@ -8,7 +8,7 @@
 		".": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "prisma generate --schema=./src/prisma/schema.prisma && tsc",
 		"generate": "prisma generate --schema=./src/prisma/schema.prisma",
 		"db:push": "prisma db push --schema=./src/prisma/schema.prisma",
 		"db:migrate": "prisma migrate dev --schema=./src/prisma/schema.prisma",
