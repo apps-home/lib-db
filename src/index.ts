@@ -1,10 +1,39 @@
-// index.ts dentro do submodule
-// Importa do output definido no schema
-import { PrismaClient } from './prisma/generated/client';
+// packages/lib-db/src/index.ts
 
-// Re-exporta a classe e os tipos para serem usados fora
-export { PrismaClient };
-export * from './prisma/generated/client';
+// Importa direto da dependência instalada
+import { PrismaClient } from "@prisma/client";
 
-// Singleton para evitar múltiplas conexões em dev (opcional, mas recomendado)
-export const prisma = new PrismaClient();
+// Re-exporta tudo
+export * from "@prisma/client";
+
+// Singleton para Dev (Next.js Hot Reloading Friendly)
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+let prismaInstance: PrismaClient | undefined;
+
+// Função para obter ou criar o PrismaClient de forma lazy
+function getPrismaClient(): PrismaClient {
+	if (process.env.NODE_ENV !== "production") {
+		if (!globalForPrisma.prisma) {
+			globalForPrisma.prisma = new PrismaClient();
+		}
+		return globalForPrisma.prisma;
+	}
+	if (!prismaInstance) {
+		prismaInstance = new PrismaClient();
+	}
+	return prismaInstance;
+}
+
+// Exporta como getter usando Proxy para inicialização verdadeiramente lazy
+// Isso evita que o PrismaClient seja criado no momento do import
+export const prisma = new Proxy({} as PrismaClient, {
+	get(_target, prop) {
+		const client = getPrismaClient();
+		const value = (client as any)[prop];
+		if (typeof value === "function") {
+			return value.bind(client);
+		}
+		return value;
+	},
+});
