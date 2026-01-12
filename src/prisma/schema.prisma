@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["better-auth", "finance-assets"]
 }
 
 // --- MODELS BETTER-AUTH ---
@@ -22,6 +23,7 @@ model User {
 
   @@unique([email])
   @@map("user")
+  @@schema("better-auth")
 }
 
 model Session {
@@ -38,6 +40,7 @@ model Session {
   @@unique([token])
   @@index([userId])
   @@map("session")
+  @@schema("better-auth")
 }
 
 model Account {
@@ -58,6 +61,7 @@ model Account {
 
   @@index([userId])
   @@map("account")
+  @@schema("better-auth")
 }
 
 model Verification {
@@ -70,6 +74,7 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+  @@schema("better-auth")
 }
 
 // --- MODELS FINANCE ASSETS ---
@@ -86,6 +91,7 @@ model AssetCategory {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("asset_categories")
+  @@schema("finance-assets")
 }
 
 model AssetRecord {
@@ -102,4 +108,5 @@ model AssetRecord {
 
   @@unique([categoryId, month, year])
   @@map("asset_records")
+  @@schema("finance-assets")
 }
