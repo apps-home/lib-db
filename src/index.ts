@@ -3,7 +3,7 @@ import { PrismaClient } from './prisma/generated/prisma/client'
 
 export * from './prisma/generated/prisma/client'
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 let prismaInstance: PrismaClient | undefined
 
@@ -12,11 +12,14 @@ function getPrismaClient(): PrismaClient {
 		if (!globalForPrisma.prisma) {
 			globalForPrisma.prisma = new PrismaClient({ adapter: driver })
 		}
+
 		return globalForPrisma.prisma
 	}
+
 	if (!prismaInstance) {
 		prismaInstance = new PrismaClient({ adapter: driver })
 	}
+
 	return prismaInstance
 }
 
