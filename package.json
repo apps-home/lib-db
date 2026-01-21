@@ -9,18 +9,18 @@
 	},
 	"scripts": {
 		"build": "prisma generate --schema=./src/prisma/schema.prisma && tsc",
-		"generate": "prisma generate --schema=./src/prisma/schema.prisma",
-		"db:push": "prisma db push --schema=./src/prisma/schema.prisma",
-		"db:migrate": "prisma migrate dev --schema=./src/prisma/schema.prisma",
-		"db:studio": "prisma studio --schema=./src/prisma/schema.prisma",
-		"prepublishOnly": "pnpm run build && pnpm run generate"
+		"push": "prisma db push --schema=./src/prisma/schema.prisma",
+		"migrate": "prisma migrate dev --schema=./src/prisma/schema.prisma",
+		"studio": "prisma studio --schema=./src/prisma/schema.prisma",
+		"dev": "tsc --watch"
 	},
 	"dependencies": {
-		"@prisma/client": "^7.2.0"
+		"@prisma/adapter-pg": "^7.2.0",
+		"@prisma/client": "^7.2.0",
+		"dotenv": "^17.2.3"
 	},
 	"devDependencies": {
-		"@types/node": "^25.0.6",
-		"dotenv": "^17.2.3",
+		"@types/node": "^25.0.9",
 		"prisma": "^7.2.0",
 		"typescript": "^5.9.3"
 	},

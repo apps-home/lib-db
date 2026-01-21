@@ -1,13 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "./generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   schemas  = ["better-auth", "finance-assets"]
 }
-
-// --- MODELS BETTER-AUTH ---
 
 model User {
   id              String          @id
@@ -76,8 +75,6 @@ model Verification {
   @@map("verification")
   @@schema("better-auth")
 }
-
-// --- MODELS FINANCE ASSETS ---
 
 model AssetCategory {
   id        String        @id @default(uuid())
