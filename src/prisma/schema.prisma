@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["auth", "finance_assets"]
+  schemas  = ["better-auth", "finance-assets"]
 }
 
 model User {
@@ -21,7 +21,7 @@ model User {
 
   @@unique([email])
   @@map("user")
-  @@schema("auth")
+  @@schema("better-auth")
 }
 
 model Session {
@@ -38,7 +38,7 @@ model Session {
   @@unique([token])
   @@index([userId])
   @@map("session")
-  @@schema("auth")
+  @@schema("better-auth")
 }
 
 model Account {
@@ -59,7 +59,7 @@ model Account {
 
   @@index([userId])
   @@map("account")
-  @@schema("auth")
+  @@schema("better-auth")
 }
 
 model Verification {
@@ -72,7 +72,7 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
-  @@schema("auth")
+  @@schema("better-auth")
 }
 
 model AssetCategory {
@@ -85,7 +85,7 @@ model AssetCategory {
   updatedAt DateTime      @updatedAt
 
   @@map("asset_categories")
-  @@schema("finance_assets")
+  @@schema("finance-assets")
 }
 
 model AssetRecord {
@@ -102,5 +102,5 @@ model AssetRecord {
 
   @@unique([categoryId, month, year])
   @@map("asset_records")
-  @@schema("finance_assets")
+  @@schema("finance-assets")
 }
