@@ -34,3 +34,18 @@ export const prisma = new Proxy({} as PrismaClient, {
 		return value
 	}
 })
+
+export const prismaFinanceAssets = {
+	assetRecord: prisma.assetRecord,
+	assetCategory: prisma.assetCategory,
+	// Utility methods
+	$transaction: prisma.$transaction.bind(prisma),
+	$disconnect: prisma.$disconnect.bind(prisma),
+	$connect: prisma.$connect.bind(prisma),
+	$executeRaw: prisma.$executeRaw.bind(prisma),
+	$executeRawUnsafe: prisma.$executeRawUnsafe.bind(prisma),
+	$queryRaw: prisma.$queryRaw.bind(prisma),
+	$queryRawUnsafe: prisma.$queryRawUnsafe.bind(prisma)
+} as const
+
+export type FinanceAssets = typeof prismaFinanceAssets
