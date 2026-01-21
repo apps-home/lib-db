@@ -1,12 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "./generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["auth", "finance_assets"]
 }
-
-// --- MODELS BETTER-AUTH ---
 
 model User {
   id            String    @id
@@ -21,6 +21,7 @@ model User {
 
   @@unique([email])
   @@map("user")
+  @@schema("auth")
 }
 
 model Session {
@@ -37,6 +38,7 @@ model Session {
   @@unique([token])
   @@index([userId])
   @@map("session")
+  @@schema("auth")
 }
 
 model Account {
@@ -57,6 +59,7 @@ model Account {
 
   @@index([userId])
   @@map("account")
+  @@schema("auth")
 }
 
 model Verification {
@@ -69,9 +72,8 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+  @@schema("auth")
 }
-
-// --- MODELS FINANCE ASSETS ---
 
 model AssetCategory {
   id        String        @id @default(uuid())
@@ -83,6 +85,7 @@ model AssetCategory {
   updatedAt DateTime      @updatedAt
 
   @@map("asset_categories")
+  @@schema("finance_assets")
 }
 
 model AssetRecord {
@@ -99,4 +102,5 @@ model AssetRecord {
 
   @@unique([categoryId, month, year])
   @@map("asset_records")
+  @@schema("finance_assets")
 }
