@@ -1,4 +1,4 @@
-import { driver } from './client'
+import { getDriver } from './client'
 import { PrismaClient } from './prisma/generated/prisma/client'
 
 export * from './prisma/generated/prisma/client'
@@ -10,14 +10,14 @@ let prismaInstance: PrismaClient | undefined
 function getPrismaClient(): PrismaClient {
 	if (process.env.NODE_ENV !== 'production') {
 		if (!globalForPrisma.prisma) {
-			globalForPrisma.prisma = new PrismaClient({ adapter: driver })
+			globalForPrisma.prisma = new PrismaClient({ adapter: getDriver() })
 		}
 
 		return globalForPrisma.prisma
 	}
 
 	if (!prismaInstance) {
-		prismaInstance = new PrismaClient({ adapter: driver })
+		prismaInstance = new PrismaClient({ adapter: getDriver() })
 	}
 
 	return prismaInstance

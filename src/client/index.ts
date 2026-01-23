@@ -1,11 +1,23 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 
-const databaseUrl = process.env.DATABASE_URL
+let _driver: PrismaPg | null = null
 
-if (!databaseUrl) {
-	throw new Error('DATABASE_URL environment variable is not defined')
+export function getDriver(): PrismaPg {
+	if (!_driver) {
+		const databaseUrl = process.env.DATABASE_URL
+		if (!databaseUrl) {
+			throw new Error('DATABASE_URL environment variable is not defined')
+		}
+		_driver = new PrismaPg({
+			connectionString: databaseUrl
+		})
+	}
+	return _driver
 }
 
-export const driver = new PrismaPg({
-	connectionString: databaseUrl
+// For backwards compatibility
+export const driver = new Proxy({} as PrismaPg, {
+	get(_target, prop) {
+		return (getDriver() as any)[prop]
+	}
 })
