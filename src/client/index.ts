@@ -1,20 +1,22 @@
-import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaNeon } from '@prisma/adapter-neon'
 
-let _driver: PrismaPg | null = null
+let _driver: PrismaNeon | null = null
 
-export function getDriver(): PrismaPg {
+export function getDriver(): PrismaNeon {
 	if (!_driver) {
-		const databaseUrl = process.env.DATABASE_URL
+		const connectionString = process.env.DATABASE_URL
 
-		_driver = new PrismaPg({
-			connectionString: databaseUrl
-		})
+		// if (!connectionString) {
+		// 	throw new Error('DATABASE_URL environment variable is not set')
+		// }
+
+		_driver = new PrismaNeon({ connectionString })
 	}
 	return _driver
 }
 
 // For backwards compatibility
-export const driver = new Proxy({} as PrismaPg, {
+export const driver = new Proxy({} as PrismaNeon, {
 	get(_target, prop) {
 		return (getDriver() as any)[prop]
 	}
