@@ -5,9 +5,7 @@ let _driver: PrismaPg | null = null
 export function getDriver(): PrismaPg {
 	if (!_driver) {
 		const databaseUrl = process.env.DATABASE_URL
-		if (!databaseUrl) {
-			throw new Error('DATABASE_URL environment variable is not defined')
-		}
+
 		_driver = new PrismaPg({
 			connectionString: databaseUrl
 		})
