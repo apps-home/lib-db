@@ -38,6 +38,7 @@ export const prisma = new Proxy({} as PrismaClient, {
 export const prismaFinanceAssets = {
 	assetRecord: prisma.assetRecord,
 	assetCategory: prisma.assetCategory,
+	assetCategoryCompetence: prisma.assetCategoryCompetence,
 	// Utility methods
 	$transaction: prisma.$transaction.bind(prisma),
 	$disconnect: prisma.$disconnect.bind(prisma),
