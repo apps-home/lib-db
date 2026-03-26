@@ -76,18 +76,38 @@ model Verification {
   @@schema("better-auth")
 }
 
+model Asset {
+  id                  String   @id @default(uuid())
+  categoryId          String
+  name                String
+  ticker              String?
+  currentClosePrice   Decimal? @db.Decimal(15, 4)
+  lastMonthClosePrice Decimal? @db.Decimal(15, 4)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@map("assets")
+  @@schema("finance-assets")
+}
+
 model AssetCategory {
-  id        String        @id @default(uuid())
+  id        String       @id @default(uuid())
   userId    String
   name      String
-  currency  String        @default("BRL")
-  records   AssetRecord[]
+  type      CategoryType @default(FIXED)
+  currency  String       @default("BRL")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  records     AssetRecord[]
   competences AssetCategoryCompetence[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  assets      Asset[]
+  user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  @@index([userId])
   @@map("asset_categories")
   @@schema("finance-assets")
 }
@@ -100,6 +120,7 @@ model AssetCategoryCompetence {
   category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, year])
+  @@index([categoryId])
   @@map("asset_category_competences")
   @@schema("finance-assets")
 }
@@ -117,6 +138,16 @@ model AssetRecord {
   category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, month, year])
+  @@index([categoryId])
   @@map("asset_records")
+  @@schema("finance-assets")
+}
+
+enum CategoryType {
+  VARIABLE_BR
+  VARIABLE_US
+  CRYPTO
+  FIXED
+
   @@schema("finance-assets")
 }
