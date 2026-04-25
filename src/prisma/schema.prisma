@@ -21,6 +21,7 @@ model User {
   assetCategories AssetCategory[]
 
   @@unique([email])
+  @@index([email])
   @@map("user")
   @@schema("better-auth")
 }
@@ -89,18 +90,21 @@ model Asset {
   category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
+  @@index([ticker])
+  @@index([categoryId, ticker])
   @@map("assets")
   @@schema("finance-assets")
 }
 
 model AssetCategory {
-  id        String       @id @default(uuid())
-  userId    String
-  name      String
-  type      CategoryType @default(FIXED)
-  currency  String       @default("BRL")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id               String       @id @default(uuid())
+  userId           String
+  name             String
+  type             CategoryType @default(FIXED)
+  targetPercentage Decimal?     @db.Decimal(5, 2)
+  currency         String       @default("BRL")
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   records     AssetRecord[]
   competences AssetCategoryCompetence[]
@@ -108,6 +112,7 @@ model AssetCategory {
   user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, type])
   @@map("asset_categories")
   @@schema("finance-assets")
 }
@@ -121,24 +126,29 @@ model AssetCategoryCompetence {
 
   @@unique([categoryId, year])
   @@index([categoryId])
+  @@index([categoryId, year])
   @@map("asset_category_competences")
   @@schema("finance-assets")
 }
 
 model AssetRecord {
-  id           String   @id @default(uuid())
-  categoryId   String
-  month        Int
-  year         Int
-  amount       Decimal  @db.Decimal(15, 2)
-  exchangeRate Decimal? @db.Decimal(10, 4)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(uuid())
+  categoryId     String
+  month          Int
+  year           Int
+  amount         Decimal  @db.Decimal(15, 2)
+  exchangeRate   Decimal? @db.Decimal(10, 4)
+  dividendAmount Decimal? @db.Decimal(15, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, month, year])
   @@index([categoryId])
+  @@index([categoryId, month])
+  @@index([categoryId, year])
+  @@index([categoryId, month, year])
   @@map("asset_records")
   @@schema("finance-assets")
 }
