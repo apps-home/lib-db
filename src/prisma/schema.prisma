@@ -81,7 +81,11 @@ model Asset {
   id                  String   @id @default(uuid())
   categoryId          String
   name                String
-  ticker              String?
+  ticker              String
+  quantity            Decimal? @db.Decimal(15, 8)
+  averagePrice        Decimal? @db.Decimal(15, 4)
+  broker              String?
+  isActive            Boolean  @default(true)
   currentClosePrice   Decimal? @db.Decimal(15, 4)
   lastMonthClosePrice Decimal? @db.Decimal(15, 4)
   createdAt           DateTime @default(now())
