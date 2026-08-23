@@ -8,57 +8,57 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 let prismaInstance: PrismaClient | undefined
 
 function getPrismaClient(): PrismaClient {
-	if (process.env.NODE_ENV !== 'production') {
-		if (!globalForPrisma.prisma) {
-			globalForPrisma.prisma = new PrismaClient({ adapter: getDriver() })
-		}
+  if (process.env.NODE_ENV !== 'production') {
+    if (!globalForPrisma.prisma) {
+      globalForPrisma.prisma = new PrismaClient({ adapter: getDriver() })
+    }
 
-		return globalForPrisma.prisma
-	}
+    return globalForPrisma.prisma
+  }
 
-	if (!prismaInstance) {
-		prismaInstance = new PrismaClient({ adapter: getDriver() })
-	}
+  if (!prismaInstance) {
+    prismaInstance = new PrismaClient({ adapter: getDriver() })
+  }
 
-	return prismaInstance
+  return prismaInstance
 }
 
 export const prisma = new Proxy({} as PrismaClient, {
-	get(_target, prop) {
-		const client = getPrismaClient()
+  get(_target, prop) {
+    const client = getPrismaClient()
 
-		const value = (client as any)[prop]
-		if (typeof value === 'function') {
-			return value.bind(client)
-		}
-		return value
-	}
+    const value = (client as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
+  }
 })
 
 const basePrisma = {
-	$transaction: prisma.$transaction.bind(prisma),
-	$disconnect: prisma.$disconnect.bind(prisma),
-	$connect: prisma.$connect.bind(prisma),
-	$executeRaw: prisma.$executeRaw.bind(prisma),
-	$executeRawUnsafe: prisma.$executeRawUnsafe.bind(prisma),
-	$queryRaw: prisma.$queryRaw.bind(prisma),
-	$queryRawUnsafe: prisma.$queryRawUnsafe.bind(prisma)
+  $transaction: prisma.$transaction.bind(prisma),
+  $disconnect: prisma.$disconnect.bind(prisma),
+  $connect: prisma.$connect.bind(prisma),
+  $executeRaw: prisma.$executeRaw.bind(prisma),
+  $executeRawUnsafe: prisma.$executeRawUnsafe.bind(prisma),
+  $queryRaw: prisma.$queryRaw.bind(prisma),
+  $queryRawUnsafe: prisma.$queryRawUnsafe.bind(prisma)
 } as const
 
 export const prismaFinanceAssets = {
-	asset: prisma.asset,
-	assetRecord: prisma.assetRecord,
-	assetCategory: prisma.assetCategory,
-	assetCategoryCompetence: prisma.assetCategoryCompetence,
-	...basePrisma
+  asset: prisma.asset,
+  assetRecord: prisma.assetRecord,
+  assetCategory: prisma.assetCategory,
+  assetCategoryCompetence: prisma.assetCategoryCompetence,
+  ...basePrisma
 } as const
 
 export const prismaAuth = {
-	user: prisma.user,
-	account: prisma.account,
-	session: prisma.session,
-	verification: prisma.verification,
-	...basePrisma
+  user: prisma.user,
+  account: prisma.account,
+  session: prisma.session,
+  verification: prisma.verification,
+  ...basePrisma
 } as const
 
 export type FinanceAssets = typeof prismaFinanceAssets
