@@ -9,16 +9,17 @@ datasource db {
 }
 
 model User {
-  id              String          @id
+  id              String           @id
   name            String
   email           String
-  emailVerified   Boolean         @default(false)
+  emailVerified   Boolean          @default(false)
   image           String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   sessions        Session[]
   accounts        Account[]
   assetCategories AssetCategory[]
+  assetWishlists  AssetWishlists[]
 
   @@unique([email])
   @@index([email])
@@ -112,14 +113,39 @@ model AssetCategory {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
-  records     AssetRecord[]
-  competences AssetCategoryCompetence[]
-  assets      Asset[]
-  user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records        AssetRecord[]
+  competences    AssetCategoryCompetence[]
+  assets         Asset[]
+  assetWishlists AssetWishlists[]
+  user           User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, type])
   @@map("asset_categories")
+  @@schema("finance-assets")
+}
+
+model AssetWishlists {
+  id                  String   @id @default(uuid())
+  userId              String
+  categoryId          String
+  name                String
+  ticker              String
+  targetPrice         Decimal? @db.Decimal(15, 4)
+  currentClosePrice   Decimal? @db.Decimal(15, 4)
+  lastMonthClosePrice Decimal? @db.Decimal(15, 4)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ticker])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([ticker])
+  @@map("asset_wishlists")
   @@schema("finance-assets")
 }
 
