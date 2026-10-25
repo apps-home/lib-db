@@ -82,18 +82,20 @@ model Verification {
 }
 
 model Asset {
-  id                  String   @id @default(uuid())
+  id                  String    @id @default(uuid())
   categoryId          String
   name                String
   ticker              String
-  quantity            Decimal? @db.Decimal(15, 8)
-  averagePrice        Decimal? @db.Decimal(15, 4)
+  quantity            Decimal?  @db.Decimal(15, 8)
+  averagePrice        Decimal?  @db.Decimal(15, 4)
   broker              String?
-  isActive            Boolean  @default(true)
-  currentClosePrice   Decimal? @db.Decimal(15, 4)
-  lastMonthClosePrice Decimal? @db.Decimal(15, 4)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  isActive            Boolean   @default(true)
+  currentClosePrice   Decimal?  @db.Decimal(15, 4)
+  lastMonthClosePrice Decimal?  @db.Decimal(15, 4)
+  // Quando o histórico de proventos foi importado (backfill); null = ainda não importado
+  dividendsImportedAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   category  AssetCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   dividends AssetDividend[]
@@ -166,15 +168,16 @@ model AssetCategoryCompetence {
 }
 
 model AssetRecord {
-  id             String   @id @default(uuid())
-  categoryId     String
-  month          Int
-  year           Int
-  amount         Decimal  @db.Decimal(15, 2)
-  exchangeRate   Decimal? @db.Decimal(10, 4)
-  dividendAmount Decimal? @db.Decimal(15, 2)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  categoryId         String
+  month              Int
+  year               Int
+  amount             Decimal  @db.Decimal(15, 2)
+  exchangeRate       Decimal? @db.Decimal(10, 4)
+  dividendAmount     Decimal? @db.Decimal(15, 2)
+  contributionAmount Decimal? @db.Decimal(15, 2)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
@@ -234,6 +237,30 @@ enum CategoryType {
   VARIABLE_US
   CRYPTO
   FIXED
+
+  @@schema("finance-assets")
+}
+
+model BenchmarkReturn {
+  id        String        @id @default(uuid())
+  benchmark BenchmarkType
+  year      Int
+  month     Int
+  /// Retorno do mês em % (ex.: 1.0523 = +1,0523%)
+  returnPct Decimal       @db.Decimal(12, 6)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([benchmark, year, month])
+  @@index([benchmark, year, month])
+  @@map("benchmark_returns")
+  @@schema("finance-assets")
+}
+
+enum BenchmarkType {
+  CDI
+  IBOV
+  SP500_BRL
 
   @@schema("finance-assets")
 }
