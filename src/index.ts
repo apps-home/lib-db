@@ -51,6 +51,7 @@ export const prismaFinanceAssets = {
   assetCategory: prisma.assetCategory,
   assetCategoryCompetence: prisma.assetCategoryCompetence,
   assetWishlists: prisma.assetWishlists,
+  assetDividend: prisma.assetDividend,
   ...basePrisma
 } as const
 

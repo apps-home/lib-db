@@ -20,6 +20,7 @@ model User {
   accounts        Account[]
   assetCategories AssetCategory[]
   assetWishlists  AssetWishlists[]
+  assetDividends  AssetDividend[]
 
   @@unique([email])
   @@index([email])
@@ -94,7 +95,8 @@ model Asset {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category  AssetCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  dividends AssetDividend[]
 
   @@index([categoryId])
   @@index([ticker])
@@ -185,8 +187,50 @@ model AssetRecord {
   @@schema("finance-assets")
 }
 
+model AssetDividend {
+  id           String         @id @default(uuid())
+  assetId      String
+  userId       String
+  type         DividendType   @default(DIVIDEND)
+  source       DividendSource @default(MANUAL)
+  amount       Decimal        @db.Decimal(15, 2)
+  rateAmount   Decimal?       @db.Decimal(15, 4)
+  quantity     Decimal?       @db.Decimal(15, 8)
+  exchangeRate Decimal?       @db.Decimal(10, 4)
+  comDate      DateTime?
+  paymentDate  DateTime
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, type, paymentDate])
+  @@index([userId, paymentDate])
+  @@index([assetId])
+  @@map("asset_dividends")
+  @@schema("finance-assets")
+}
+
+enum DividendType {
+  DIVIDEND
+  JCP
+  INCOME
+  OTHER
+
+  @@schema("finance-assets")
+}
+
+enum DividendSource {
+  MANUAL
+  SYNC
+
+  @@schema("finance-assets")
+}
+
 enum CategoryType {
   VARIABLE_BR
+  FII
   VARIABLE_US
   CRYPTO
   FIXED

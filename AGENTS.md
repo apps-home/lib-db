@@ -12,6 +12,8 @@ A partir da raiz do monorepo:
 |---|---|
 | `pnpm --filter @lib/db build` | Gera o Prisma Client (`prisma generate`) e compila o TypeScript (`tsc`). |
 | `pnpm --filter @lib/db migrate` | Executa e gera novas migrations em desenvolvimento (`prisma migrate dev`). |
+| `pnpm --filter @lib/db migrate:deploy` | Aplica migrations pendentes em produção/CI (`prisma migrate deploy`). |
+| `pnpm --filter @lib/db migrate:status` | Verifica status das migrations no banco configurado (`prisma migrate status`). |
 | `pnpm --filter @lib/db push` | Sincroniza o schema diretamente no banco sem criar migration (`prisma db push`). |
 | `pnpm --filter @lib/db studio` | Abre a interface web do Prisma Studio para inspeção dos dados. |
 
@@ -50,12 +52,21 @@ O schema é dividido em dois namespaces PostgreSQL: `better-auth` (autenticaçã
 | `asset_wishlists` | Ativos monitorados / lista de desejos do usuário. Campos: `id`, `userId`, `categoryId`, `name`, `ticker`, `targetPrice`, `currentClosePrice`, `lastMonthClosePrice`, `notes`, `createdAt`, `updatedAt`. |
 | `asset_records` | Registro histórico mensal do valor consolidado de uma categoria. Campos: `id`, `categoryId`, `month`, `year`, `amount`, `exchangeRate`, `dividendAmount`. |
 | `asset_category_competences` | Registra em quais **anos** uma categoria possui registros, otimizando queries de filtro temporal. Campos: `id`, `categoryId`, `year`. |
+| `asset_dividends` | Provento recebido por um ativo. Campos: `id`, `assetId`, `userId`, `type` (`DividendType`), `source` (`DividendSource`), `amount` (total na moeda da categoria), `rateAmount` (por cota), `quantity`, `exchangeRate` (para BRL, em moedas estrangeiras), `comDate`, `paymentDate`. Único por `(assetId, type, paymentDate)`. |
+
+### Enums: `DividendType` e `DividendSource`
+
+| Enum | Valores |
+|---|---|
+| `DividendType` | `DIVIDEND`, `JCP`, `INCOME` (rendimento de FII), `OTHER` |
+| `DividendSource` | `MANUAL` (lançado pelo usuário), `SYNC` (sincronizado de Brapi/Polygon) |
 
 ### Enum: `CategoryType`
 
 | Valor | Descrição |
 |---|---|
 | `VARIABLE_BR` | Renda Variável — Mercado Brasileiro (Brapi) |
+| `FII` | Fundos Imobiliários (Brapi) |
 | `VARIABLE_US` | Renda Variável — Mercado Americano (Alpha Vantage) |
 | `CRYPTO` | Criptomoedas (CoinGecko) |
 | `FIXED` | Renda Fixa (sem cotação de mercado) |

@@ -10,6 +10,8 @@
     "build": "prisma generate --schema=./src/prisma/schema.prisma && tsc",
     "push": "prisma db push --schema=./src/prisma/schema.prisma",
     "migrate": "prisma migrate dev --schema=./src/prisma/schema.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=./src/prisma/schema.prisma",
+    "migrate:status": "prisma migrate status --schema=./src/prisma/schema.prisma",
     "studio": "prisma studio --schema=./src/prisma/schema.prisma",
     "dev": "tsc --watch"
   },
