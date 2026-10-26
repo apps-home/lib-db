@@ -199,6 +199,7 @@ model AssetDividend {
   amount       Decimal        @db.Decimal(15, 2)
   rateAmount   Decimal?       @db.Decimal(15, 4)
   quantity     Decimal?       @db.Decimal(15, 8)
+  taxAmount    Decimal?       @db.Decimal(15, 2)
   exchangeRate Decimal?       @db.Decimal(10, 4)
   comDate      DateTime?
   paymentDate  DateTime

@@ -53,7 +53,7 @@ O schema é dividido em dois namespaces PostgreSQL: `better-auth` (autenticaçã
 | `asset_records` | Registro histórico mensal do valor consolidado de uma categoria. Campos: `id`, `categoryId`, `month`, `year`, `amount`, `exchangeRate`, `dividendAmount`, `contributionAmount`. |
 | `benchmark_returns` | Retorno mensal em % de CDI, Ibovespa e S&P 500 em R$ (cache global). Campos: `id`, `benchmark` (`BenchmarkType`), `year`, `month`, `returnPct`. Único por `(benchmark, year, month)`. |
 | `asset_category_competences` | Registra em quais **anos** uma categoria possui registros, otimizando queries de filtro temporal. Campos: `id`, `categoryId`, `year`. |
-| `asset_dividends` | Provento recebido por um ativo. Campos: `id`, `assetId`, `userId`, `type` (`DividendType`), `source` (`DividendSource`), `amount` (total na moeda da categoria), `rateAmount` (por cota), `quantity`, `exchangeRate` (para BRL, em moedas estrangeiras), `comDate`, `paymentDate`. Único por `(assetId, type, paymentDate)`. |
+| `asset_dividends` | Provento recebido por um ativo. Campos: `id`, `assetId`, `userId`, `type` (`DividendType`), `source` (`DividendSource`), `amount` (total bruto na moeda da categoria), `taxAmount` (impostos retidos, opcional; líquido = `amount − taxAmount`), `rateAmount` (por cota), `quantity`, `exchangeRate` (para BRL, em moedas estrangeiras), `comDate`, `paymentDate`. Único por `(assetId, type, paymentDate)`. |
 
 ### Enums: `DividendType` e `DividendSource`
 
