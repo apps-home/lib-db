@@ -90,17 +90,21 @@ model Asset {
   averagePrice        Decimal?  @db.Decimal(15, 4)
   broker              String?
   isActive            Boolean   @default(true)
+  // Ativo com cotação de mercado: o preço vem de `marketAsset`
+  marketAssetId       String?
+  // Preço manual, usado só sem `marketAsset` (ex.: renda fixa)
   currentClosePrice   Decimal?  @db.Decimal(15, 4)
-  lastMonthClosePrice Decimal?  @db.Decimal(15, 4)
   // Quando o histórico de proventos foi importado (backfill); null = ainda não importado
   dividendsImportedAt DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  category  AssetCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  dividends AssetDividend[]
+  category    AssetCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  marketAsset MarketAsset?    @relation(fields: [marketAssetId], references: [id], onDelete: SetNull)
+  dividends   AssetDividend[]
 
   @@index([categoryId])
+  @@index([marketAssetId])
   @@index([ticker])
   @@index([categoryId, ticker])
   @@map("assets")
@@ -130,26 +134,50 @@ model AssetCategory {
 }
 
 model AssetWishlists {
-  id                  String   @id @default(uuid())
-  userId              String
-  categoryId          String
-  name                String
-  ticker              String
-  targetPrice         Decimal? @db.Decimal(15, 4)
-  currentClosePrice   Decimal? @db.Decimal(15, 4)
-  lastMonthClosePrice Decimal? @db.Decimal(15, 4)
-  notes               String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String
+  categoryId    String
+  name          String
+  ticker        String
+  targetPrice   Decimal? @db.Decimal(15, 4)
+  // Cotação vem de `marketAsset` (null para tipos sem cotação de mercado)
+  marketAssetId String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  marketAsset MarketAsset?  @relation(fields: [marketAssetId], references: [id], onDelete: SetNull)
 
   @@unique([userId, ticker])
   @@index([userId])
   @@index([categoryId])
+  @@index([marketAssetId])
   @@index([ticker])
   @@map("asset_wishlists")
+  @@schema("finance-assets")
+}
+
+/// Catálogo de ativos com cotação de mercado, compartilhado entre usuários.
+/// Uma linha por ticker + tipo: a cotação é buscada uma vez e reaproveitada
+/// por todos os `assets` e `asset_wishlists` que apontam para ela.
+model MarketAsset {
+  id                  String       @id @default(uuid())
+  ticker              String
+  type                CategoryType
+  name                String
+  currentClosePrice   Decimal?     @db.Decimal(15, 4)
+  lastMonthClosePrice Decimal?     @db.Decimal(15, 4)
+  priceUpdatedAt      DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  assets    Asset[]
+  wishlists AssetWishlists[]
+
+  @@unique([ticker, type])
+  @@map("market_assets")
   @@schema("finance-assets")
 }
 
