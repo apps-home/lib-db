@@ -48,19 +48,26 @@ O schema é dividido em dois namespaces PostgreSQL: `better-auth` (autenticaçã
 | Tabela | Descrição |
 |---|---|
 | `asset_categories` | Classe de ativos do usuário. Campos: `id`, `userId`, `name`, `type` (enum `CategoryType`), `currency` (padrão `BRL`). |
-| `assets` | Ativo individual dentro de uma categoria. Campos: `id`, `categoryId`, `name`, `ticker`, `currentClosePrice`, `lastMonthClosePrice`, `dividendsImportedAt` (quando o histórico de proventos foi importado; `null` = pendente). |
+| `assets` | Ativo individual dentro de uma categoria. Campos: `id`, `categoryId`, `name`, `ticker`, `currentClosePrice`, `lastMonthClosePrice`, `dividendsImportedAt` (quando o histórico de proventos foi importado; `null` = pendente), `indexer` (`FixedIncomeIndexer`, renda fixa com saldo calculado; `null` = manual), `indexerRate`, `investedAt`, `maturityAt`. |
 | `asset_wishlists` | Ativos monitorados / lista de desejos do usuário. Campos: `id`, `userId`, `categoryId`, `name`, `ticker`, `targetPrice`, `currentClosePrice`, `lastMonthClosePrice`, `notes`, `createdAt`, `updatedAt`. |
 | `asset_records` | Registro histórico mensal do valor consolidado de uma categoria. Campos: `id`, `categoryId`, `month`, `year`, `amount`, `exchangeRate`, `dividendAmount`, `contributionAmount`. |
-| `benchmark_returns` | Retorno mensal em % de CDI, Ibovespa e S&P 500 em R$ (cache global). Campos: `id`, `benchmark` (`BenchmarkType`), `year`, `month`, `returnPct`. Único por `(benchmark, year, month)`. |
+| `benchmark_returns` | Retorno mensal em % de CDI, Ibovespa, IFIX, S&P 500 e bitcoin em R$, todos de retorno total (cache global). Campos: `id`, `benchmark` (`BenchmarkType`), `year`, `month`, `returnPct`. Único por `(benchmark, year, month)`. |
+| `indicator_rates` | CDI diário e IPCA mensal do Banco Central (cache global). Campos: `id`, `indicator` (`EconomicIndicator`), `date`, `ratePct`. Único por `(indicator, date)`. |
 | `asset_category_competences` | Registra em quais **anos** uma categoria possui registros, otimizando queries de filtro temporal. Campos: `id`, `categoryId`, `year`. |
 | `asset_dividends` | Provento recebido por um ativo. Campos: `id`, `assetId`, `userId`, `type` (`DividendType`), `source` (`DividendSource`), `amount` (total bruto na moeda da categoria), `taxAmount` (impostos retidos, opcional; líquido = `amount − taxAmount`), `rateAmount` (por cota), `quantity`, `exchangeRate` (para BRL, em moedas estrangeiras), `comDate`, `paymentDate`. Único por `(assetId, type, paymentDate)`. |
+| `asset_transactions` | Operação de um ativo (compra, venda, saldo inicial, desdobramento, grupamento, bonificação). Campos: `id`, `assetId`, `userId`, `type` (`TransactionType`), `source` (`TransactionSource`), `date`, `quantity`, `price`, `fees`, `factor`, `exchangeRate`, `notes`. Com operações, quantidade e preço médio do ativo são calculados a partir delas. |
 
-### Enums: `DividendType` e `DividendSource`
+### Enums
 
 | Enum | Valores |
 |---|---|
 | `DividendType` | `DIVIDEND`, `JCP`, `INCOME` (rendimento de FII), `OTHER` |
 | `DividendSource` | `MANUAL` (lançado pelo usuário), `SYNC` (sincronizado de Brapi/Polygon) |
+| `BenchmarkType` | `CDI`, `IBOV`, `SP500_BRL`, `IFIX`, `BTC_BRL` |
+| `FixedIncomeIndexer` | `CDI` (% do CDI), `IPCA` (IPCA + taxa real), `PRE` (prefixado) |
+| `EconomicIndicator` | `CDI` (diário), `IPCA` (mensal) |
+| `TransactionType` | `OPENING` (saldo inicial), `BUY`, `SELL`, `SPLIT` (desdobramento), `REVERSE_SPLIT` (grupamento), `BONUS` (bonificação) |
+| `TransactionSource` | `MANUAL`, `IMPORT` (extrato importado) |
 
 ### Enum: `CategoryType`
 
