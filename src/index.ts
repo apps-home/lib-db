@@ -56,6 +56,8 @@ export const prismaFinanceAssets = {
   benchmarkReturn: prisma.benchmarkReturn,
   indicatorRate: prisma.indicatorRate,
   assetTransaction: prisma.assetTransaction,
+  priceAlert: prisma.priceAlert,
+  patrimonyItem: prisma.patrimonyItem,
   ...basePrisma
 } as const
 

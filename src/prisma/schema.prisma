@@ -22,6 +22,8 @@ model User {
   assetWishlists    AssetWishlists[]
   assetDividends    AssetDividend[]
   assetTransactions AssetTransaction[]
+  priceAlerts       PriceAlert[]
+  patrimonyItems    PatrimonyItem[]
 
   @@unique([email])
   @@index([email])
@@ -110,6 +112,7 @@ model Asset {
   marketAsset  MarketAsset?       @relation(fields: [marketAssetId], references: [id], onDelete: SetNull)
   dividends    AssetDividend[]
   transactions AssetTransaction[]
+  priceAlerts  PriceAlert[]
 
   @@index([categoryId])
   @@index([marketAssetId])
@@ -157,6 +160,7 @@ model AssetWishlists {
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   category    AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   marketAsset MarketAsset?  @relation(fields: [marketAssetId], references: [id], onDelete: SetNull)
+  priceAlerts PriceAlert[]
 
   @@unique([userId, ticker])
   @@index([userId])
@@ -181,11 +185,61 @@ model MarketAsset {
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 
-  assets    Asset[]
-  wishlists AssetWishlists[]
+  assets      Asset[]
+  wishlists   AssetWishlists[]
+  priceAlerts PriceAlert[]
 
   @@unique([ticker, type])
   @@map("market_assets")
+  @@schema("finance-assets")
+}
+
+/// Alerta de preço de um ativo da carteira ou de um item da wishlist
+/// (exatamente um dos dois). Vigia a cotação do `marketAsset`: ao atingir o
+/// alvo notifica e fica TRIGGERED; ao sair da faixa volta a ARMED sozinho.
+model PriceAlert {
+  id                 String              @id @default(uuid())
+  userId             String
+  marketAssetId      String
+  assetId            String?
+  wishlistId         String?
+  /// Na moeda da categoria da origem
+  targetPrice        Decimal             @db.Decimal(15, 4)
+  /// ABOVE: avisa quando subir até o alvo; BELOW: quando cair até ele
+  direction          PriceAlertDirection
+  status             PriceAlertStatus    @default(ARMED)
+  lastTriggeredAt    DateTime?
+  lastTriggeredPrice Decimal?            @db.Decimal(15, 4)
+  triggerCount       Int                 @default(0)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketAsset MarketAsset     @relation(fields: [marketAssetId], references: [id], onDelete: Cascade)
+  asset       Asset?          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  wishlist    AssetWishlists? @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  @@index([marketAssetId])
+  @@index([userId])
+  @@index([assetId])
+  @@index([wishlistId])
+  @@map("price_alerts")
+  @@schema("finance-assets")
+}
+
+enum PriceAlertDirection {
+  ABOVE
+  BELOW
+
+  @@schema("finance-assets")
+}
+
+enum PriceAlertStatus {
+  /// Vigiando: notifica quando a cotação atingir o alvo
+  ARMED
+  /// Alvo atingido: volta a ARMED quando a cotação sair da faixa
+  TRIGGERED
+
   @@schema("finance-assets")
 }
 
@@ -386,6 +440,39 @@ enum BenchmarkType {
   /// IFIX pelo ETF XFIX11 (reinveste os rendimentos)
   IFIX
   BTC_BRL
+
+  @@schema("finance-assets")
+}
+
+/// Bem físico ou passivo que compõe o patrimônio líquido (Net Worth), fora das categorias de investimento
+model PatrimonyItem {
+  id            String            @id @default(uuid())
+  userId        String
+  name          String
+  type          PatrimonyItemType
+  /// Valor atual estimado em BRL (sempre positivo; o tipo LIABILITY define o sinal na soma)
+  currentValue  Decimal           @db.Decimal(15, 2)
+  /// Valor de aquisição original (opcional, para valorização/depreciação)
+  purchaseValue Decimal?          @db.Decimal(15, 2)
+  acquiredAt    DateTime?         @db.Date
+  notes         String?
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@map("patrimony_items")
+  @@schema("finance-assets")
+}
+
+enum PatrimonyItemType {
+  REAL_ESTATE
+  VEHICLE
+  EQUIPMENT
+  OTHER_ASSET
+  LIABILITY
 
   @@schema("finance-assets")
 }
