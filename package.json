@@ -1,5 +1,5 @@
 {
-  "name": "@lib/db",
+  "name": "@lib/finance-assets-db",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -25,7 +25,7 @@
     "@types/node": "^25.5.0",
     "@types/pg": "^8.23.1",
     "prisma": "^7.8.0",
-    "typescript": "^6.0.2"
+    "typescript": "^5.9.3"
   },
   "files": [
     "dist",
